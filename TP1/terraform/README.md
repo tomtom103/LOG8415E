@@ -11,3 +11,8 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
+
+To undo deployment and destroy the infrastructure:
+```bash
+$ terraform destroy
+```

@@ -29,7 +29,7 @@ variable "small_instance_type" {
 
 variable "number_of_instances" {
     description = "Number of instances to create per instance type"
-    default = 3
+    default = 2
 }
 
 variable "key_name" {

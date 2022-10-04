@@ -19,43 +19,48 @@ resource "aws_s3_bucket_acl" "elb_logs_acl" {
     acl = "private"
 }
 
-## ELB Instance
-module "elb" {
-    source = "terraform-aws-modules/elb/aws"
-    version = "3.0.1"
+## ALB Instance
+resource "aws_alb" "alb" {  
+  name               = "${var.app_name}-${var.api_version}"
+  internal           = false
+  security_groups    = [aws_security_group.everywhere.id]
+  subnets            = data.aws_subnets.all.ids
 
-    name = "${var.app_name}-${var.api_version}"
-    
-    subnets = data.aws_subnets.all.ids
+  access_logs {
+    bucket  = aws_s3_bucket.elb_logs.bucket
+    enabled = true
+  }
 
-    security_groups = [
-        aws_security_group.everywhere.id
-    ]
+  tags = var.common_tags
+}
+## ALB listener
+resource "aws_alb_listener" "alb_listener" {  
+  load_balancer_arn = "${aws_alb.alb.arn}"  
+  port              = "80"  
+  protocol          = "HTTP"
+  
+  default_action {    
+    target_group_arn = "${aws_alb_target_group.alb_target.arn}"
+    type             = "forward"  
+  }
+}
 
-    listener = [
-        {
-            instance_port = 80
-            instance_protocol = "http"
-            lb_port = 80
-            lb_protocol = "http"
-        },
-        {
-            instance_port = 80
-            instance_protocol = "http"
-            lb_port = 81
-            lb_protocol = "http"
-        }
-    ]
-
-    health_check = {
-        target = "HTTP:80/"
-        interval = 30
-        healthy_threshold = 2
-        unhealthy_threshold = 2
-        timeout = 5
+resource "aws_alb_listener_rule" "listener_rule" {
+    for_each = {
+        "cluster1": 0,
+        "cluster2": 1
     }
-
-    tags = var.common_tags
+    depends_on   = ["aws_alb_target_group.alb_target_group"]  
+    listener_arn = "${aws_alb_listener.alb_listener.arn}"  
+    priority     = "100"   
+    action {    
+        type             = "forward"    
+        target_group_arn = "${aws_alb_target_group.clusters[each.value].arn}"  
+    }   
+    condition {    
+        field  = "path-pattern"    
+        values = ["*"]  
+    }
 }
 
 ## Security Group
@@ -112,35 +117,41 @@ resource "aws_instance" "small" {
 }
 
 ## Target Groups used to attach EC2 instances to ELB
-resource "aws_lb_target_group" "cluster1" {
-    name = "cluster1"
-    port = 80
+resource "aws_alb_target_group" "clusters" {
+    for_each = toset(["cluster1", "cluster2"])
+    name = each.value
+    port = "80"
     protocol = "HTTP"
     vpc_id = "${data.aws_vpc.default.id}"
+    tags = var.common_tags
+
+    health_check {
+        healthy_threshold = 2
+        unhealthy_threshold = 10
+        timeout = 5
+        interval = 30
+        path = "/"
+        port = "80"
+        protocol = "HTTP"
+    }
 }
 
-resource "aws_lb_target_group" "cluster2" {
-    name = "cluster2"
-    port = 80
-    protocol = "HTTP"
-    vpc_id = "${data.aws_vpc.default.id}"
+
+## ELB Attachment
+resource "aws_alb_target_group_attachment" "cluster1" {
+    for_each = {
+        for i in range(0, var.number_of_instances) : "${i}" => i
+    }
+    target_group_arn = aws_alb_target_group.clusters[0].arn
+    target_id = aws_instance.large[each.value].id
+    availability_zone = "all"
 }
 
-
-module "aws_elb_attachment_large" {
-  source  = "terraform-aws-modules/elb/aws//modules/elb_attachment"
-  version = "3.0.1"
-  
-  elb = "${module.elb.elb_id}"
-  instances = aws_instance.large.*.id
-  number_of_instances = var.number_of_instances
-}
-
-module "aws_elb_attachment_small" {
-  source  = "terraform-aws-modules/elb/aws//modules/elb_attachment"
-  version = "3.0.1"
-  
-  elb = "${module.elb.elb_id}"
-  instances = aws_instance.small.*.id
-  number_of_instances = var.number_of_instances
+resource "aws_alb_target_group_attachment" "cluster2" {
+    for_each = {
+        for i in range(0, var.number_of_instances) : "${i}" => i
+    }
+    target_group_arn = aws_alb_target_group.clusters[1].arn
+    target_id = aws_instance.small[each.value].id
+    availability_zone = "all"
 }

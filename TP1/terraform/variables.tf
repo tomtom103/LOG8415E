@@ -15,11 +15,6 @@ variable "api_version" {
     default = "latest"
 }
 
-variable "vpc_id" {
-    description = "VPC ID"
-    default = "vpc-04a8518ca8d47a060"
-}
-
 variable "large_instance_type" {
     description = "Instance type for large instances"
     type = string

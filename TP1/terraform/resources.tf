@@ -3,19 +3,19 @@ resource "random_pet" "this" {
     length = 2
 }
 
-## S3 Bucket for ELB logs
-resource "aws_s3_bucket" "elb_logs" {
-    bucket = "elb-logs-${random_pet.this.id}"
+## S3 Bucket for ALB logs
+resource "aws_s3_bucket" "alb_logs" {
+    bucket = "alb-logs-${random_pet.this.id}"
     force_destroy = true
 }
 
-resource "aws_s3_bucket_policy" "elb_logs_policy" {
-    bucket = aws_s3_bucket.elb_logs.id
+resource "aws_s3_bucket_policy" "alb_logs_policy" {
+    bucket = aws_s3_bucket.alb_logs.id
     policy = data.aws_iam_policy_document.logs.json
 }
 
-resource "aws_s3_bucket_acl" "elb_logs_acl" {
-    bucket = aws_s3_bucket.elb_logs.id
+resource "aws_s3_bucket_acl" "alb_logs_acl" {
+    bucket = aws_s3_bucket.alb_logs.id
     acl = "private"
 }
 
@@ -27,7 +27,7 @@ resource "aws_alb" "alb" {
   subnets            = data.aws_subnets.all.ids
 
   access_logs {
-    bucket  = aws_s3_bucket.elb_logs.bucket
+    bucket  = aws_s3_bucket.alb_logs.bucket
     enabled = true
   }
 
@@ -35,12 +35,17 @@ resource "aws_alb" "alb" {
 }
 ## ALB listener
 resource "aws_alb_listener" "alb_listener" {  
+  for_each = {
+      "cluster1": 0,
+      "cluster2": 1
+  }
   load_balancer_arn = "${aws_alb.alb.arn}"  
   port              = "80"  
   protocol          = "HTTP"
   
-  default_action {    
-    target_group_arn = "${aws_alb_target_group.alb_target.arn}"
+  default_action {   
+    ## Depends on multiple target groups ? 
+    target_group_arn = "${aws_alb_target_group.clusters[each.key].arn}"
     type             = "forward"  
   }
 }
@@ -50,17 +55,22 @@ resource "aws_alb_listener_rule" "listener_rule" {
         "cluster1": 0,
         "cluster2": 1
     }
-    depends_on   = ["aws_alb_target_group.alb_target_group"]  
-    listener_arn = "${aws_alb_listener.alb_listener.arn}"  
+    ## Depends on multiple target groups ?
+    depends_on   = [aws_alb_target_group.clusters[each.key]] 
+    listener_arn = "${aws_alb_listener.alb_listener[each.key].arn}"  
+    # listener_arn = aws_alb_listener.alb_listener[each.key].arn  
+    # depends_on   = ["aws_alb_target_group.alb_target_group"]
     priority     = "100"   
     action {    
-        type             = "forward"    
-        target_group_arn = "${aws_alb_target_group.clusters[each.value].arn}"  
+        type             = "forward"
+        # same here (multiple clusters)
+        target_group_arn = "${aws_alb_target_group.clusters[each.key].arn}"  
     }   
-    condition {    
-        field  = "path-pattern"    
-        values = ["*"]  
+  condition {
+    path_pattern {
+      values = ["*"]
     }
+  }
 }
 
 ## Security Group
@@ -142,7 +152,7 @@ resource "aws_alb_target_group_attachment" "cluster1" {
     for_each = {
         for i in range(0, var.number_of_instances) : "${i}" => i
     }
-    target_group_arn = aws_alb_target_group.clusters[0].arn
+    target_group_arn = aws_alb_target_group.clusters["cluster1"].arn
     target_id = aws_instance.large[each.value].id
     availability_zone = "all"
 }
@@ -151,7 +161,7 @@ resource "aws_alb_target_group_attachment" "cluster2" {
     for_each = {
         for i in range(0, var.number_of_instances) : "${i}" => i
     }
-    target_group_arn = aws_alb_target_group.clusters[1].arn
+    target_group_arn = aws_alb_target_group.clusters["cluster2"].arn
     target_id = aws_instance.small[each.value].id
     availability_zone = "all"
 }

@@ -35,40 +35,41 @@ resource "aws_alb" "alb" {
 }
 ## ALB listener
 resource "aws_alb_listener" "alb_listener" {  
-  for_each = {
-      "cluster1": 0,
-      "cluster2": 1
-  }
   load_balancer_arn = "${aws_alb.alb.arn}"  
   port              = "80"  
   protocol          = "HTTP"
   
-  default_action {   
-    ## Depends on multiple target groups ? 
-    target_group_arn = "${aws_alb_target_group.clusters[each.key].arn}"
-    type             = "forward"  
+  default_action {
+    type             = "forward"
+    forward {
+      dynamic "target_group" {
+        for_each = ["cluster1", "cluster2"]
+        content {
+          arn = aws_alb_target_group.clusters[target_group.value].arn
+        }
+      }
+    }
   }
+
 }
 
 resource "aws_alb_listener_rule" "listener_rule" {
-    for_each = {
-        "cluster1": 0,
-        "cluster2": 1
-    }
-    ## Depends on multiple target groups ?
-    depends_on   = [aws_alb_target_group.clusters[each.key]] 
-    listener_arn = "${aws_alb_listener.alb_listener[each.key].arn}"  
-    # listener_arn = aws_alb_listener.alb_listener[each.key].arn  
-    # depends_on   = ["aws_alb_target_group.alb_target_group"]
-    priority     = "100"   
-    action {    
-        type             = "forward"
-        # same here (multiple clusters)
-        target_group_arn = "${aws_alb_target_group.clusters[each.key].arn}"  
-    }   
+  
+  listener_arn = "${aws_alb_listener.alb_listener.arn}"
+  priority     = 50
+
+  action {
+    type             = "forward"
+    target_group_arn = "${aws_alb_target_group.clusters["cluster1"].arn}"
+  }
+
+  action {
+    type             = "forward"
+    target_group_arn = "${aws_alb_target_group.clusters["cluster2"].arn}"
+  }
   condition {
     path_pattern {
-      values = ["*"]
+    values = ["*"]    
     }
   }
 }
@@ -126,7 +127,7 @@ resource "aws_instance" "small" {
     ami = "ami-026b57f3c383c2eec"
 }
 
-## Target Groups used to attach EC2 instances to ELB
+## Target Groups used to attach EC2 instances to ALB
 resource "aws_alb_target_group" "clusters" {
     for_each = toset(["cluster1", "cluster2"])
     name = each.value
@@ -147,14 +148,13 @@ resource "aws_alb_target_group" "clusters" {
 }
 
 
-## ELB Attachment
+## ALB Attachment
 resource "aws_alb_target_group_attachment" "cluster1" {
     for_each = {
         for i in range(0, var.number_of_instances) : "${i}" => i
     }
     target_group_arn = aws_alb_target_group.clusters["cluster1"].arn
     target_id = aws_instance.large[each.value].id
-    availability_zone = "all"
 }
 
 resource "aws_alb_target_group_attachment" "cluster2" {
@@ -163,5 +163,4 @@ resource "aws_alb_target_group_attachment" "cluster2" {
     }
     target_group_arn = aws_alb_target_group.clusters["cluster2"].arn
     target_id = aws_instance.small[each.value].id
-    availability_zone = "all"
 }

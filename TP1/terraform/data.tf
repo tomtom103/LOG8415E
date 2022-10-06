@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "logs" {
         }
 
         resources = [
-            "arn:aws:s3:::elb-logs-${random_pet.this.id}/*",
+            "arn:aws:s3:::alb-logs-${random_pet.this.id}/*",
         ]
     }
 }

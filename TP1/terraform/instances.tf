@@ -15,7 +15,11 @@ resource "aws_instance" "large" {
     })
 
     ami = "ami-08c40ec9ead489470"
-    tags = var.common_tags
+    tags = {
+        "Name" = "${random_pet.this.id}-large-${count.index}"
+        "Application" = "TP1"
+        "Version" = "latest"
+    }
 }
 
 resource "aws_instance" "small" {
@@ -34,5 +38,9 @@ resource "aws_instance" "small" {
     })
 
     ami = "ami-08c40ec9ead489470"
-    tags = var.common_tags
+    tags = {
+        "Name" = "${random_pet.this.id}-small-${count.index}"
+        "Application" = "TP1"
+        "Version" = "latest"
+    }
 }

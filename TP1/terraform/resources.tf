@@ -19,148 +19,119 @@ resource "aws_s3_bucket_acl" "alb_logs_acl" {
     acl = "private"
 }
 
-## ALB Instance
-resource "aws_alb" "alb" {  
-  name               = "${var.app_name}-${var.api_version}"
-  internal           = false
-  security_groups    = [aws_security_group.everywhere.id]
-  subnets            = data.aws_subnets.all.ids
-
-  access_logs {
-    bucket  = aws_s3_bucket.alb_logs.bucket
-    enabled = true
-  }
-
-  tags = var.common_tags
-}
-## ALB listener
-resource "aws_alb_listener" "alb_listener" {  
-  load_balancer_arn = "${aws_alb.alb.arn}"  
-  port              = "80"  
-  protocol          = "HTTP"
-  
-  default_action {
-    type             = "forward"
-    forward {
-      dynamic "target_group" {
-        for_each = ["cluster1", "cluster2"]
-        content {
-          arn = aws_alb_target_group.clusters[target_group.value].arn
-        }
-      }
-    }
-  }
-
-}
-
-resource "aws_alb_listener_rule" "listener_rule" {
-  
-  listener_arn = "${aws_alb_listener.alb_listener.arn}"
-  priority     = 50
-
-  action {
-    type             = "forward"
-    target_group_arn = "${aws_alb_target_group.clusters["cluster1"].arn}"
-  }
-
-  action {
-    type             = "forward"
-    target_group_arn = "${aws_alb_target_group.clusters["cluster2"].arn}"
-  }
-  condition {
-    path_pattern {
-    values = ["*"]    
-    }
-  }
-}
-
 ## Security Group
 resource "aws_security_group" "everywhere" {
     name   = "everywhere"
     vpc_id = "${data.aws_vpc.default.id}"
 
     ingress {
-        protocol    = "-1"
+        protocol    = -1
         cidr_blocks = ["0.0.0.0/0"]
-        from_port   = "0"
-        to_port     = "0"
+        from_port   = 0
+        to_port     = 0
     }
     egress {
-        protocol    = "-1"
+        protocol    = -1
         cidr_blocks = ["0.0.0.0/0"]
-        from_port   = "0"
-        to_port     = "0"
+        from_port   = 0
+        to_port     = 0
     }
 
     tags = var.common_tags
 }
 
-## EC2 Instances
-resource "aws_instance" "large" {
-    count = var.number_of_instances
+## ALB
+resource "aws_lb_target_group" "cluster1" {
+    name        = "cluster1"
+    port        = 80
+    protocol    = "HTTP"
+    vpc_id      = data.aws_vpc.default.id
+}
 
-    instance_type = "${var.large_instance_type}"
-    tags = var.common_tags
+resource "aws_lb_target_group" "cluster2" {
+    name        = "cluster2"
+    port        = 80
+    protocol    = "HTTP"
+    vpc_id      = data.aws_vpc.default.id
+}
 
-    key_name = "${var.key_name}"
+resource "aws_lb_target_group_attachment" "att-cluster1" {
+    count = length(aws_instance.large)
+    target_group_arn = aws_lb_target_group.cluster1.arn
+    target_id = aws_instance.large[count.index].id
+    port = 80
+}
 
-    vpc_security_group_ids = [
-        aws_security_group.everywhere.id,
+resource "aws_lb_target_group_attachment" "att-cluster2" {
+    count = length(aws_instance.small)
+    target_group_arn = aws_lb_target_group.cluster2.arn
+    target_id = aws_instance.small[count.index].id
+    port = 80
+}
+
+resource "aws_lb" "alb" {
+    name            = "alb"
+    internal        = false
+    ip_address_type = "ipv4"
+    load_balancer_type = "application"
+    security_groups = [aws_security_group.everywhere.id]
+    # Subnets used by EC2 instances
+    subnets         = [
+        element(tolist(data.aws_subnets.all.ids), 0),
+        element(tolist(data.aws_subnets.all.ids), 1),
     ]
-    subnet_id = element(tolist(data.aws_subnets.all.ids), count.index)
 
-    ami = "ami-026b57f3c383c2eec"
-}
+    access_logs {
+        bucket  = aws_s3_bucket.alb_logs.bucket
+        enabled = true
+    }
 
-resource "aws_instance" "small" {
-    count = var.number_of_instances
-
-    instance_type = "${var.small_instance_type}"
     tags = var.common_tags
-    key_name = "${var.key_name}"
-
-    vpc_security_group_ids = [
-        aws_security_group.everywhere.id,
-    ]
-    subnet_id = element(tolist(data.aws_subnets.all.ids), count.index)
-
-    ami = "ami-026b57f3c383c2eec"
 }
 
-## Target Groups used to attach EC2 instances to ALB
-resource "aws_alb_target_group" "clusters" {
-    for_each = toset(["cluster1", "cluster2"])
-    name = each.value
-    port = "80"
-    protocol = "HTTP"
-    vpc_id = "${data.aws_vpc.default.id}"
-    tags = var.common_tags
+resource "aws_lb_listener" "alb_listener_http" {
+    load_balancer_arn = aws_lb.alb.arn
+    port              = 80
+    protocol          = "HTTP"
 
-    health_check {
-        healthy_threshold = 2
-        unhealthy_threshold = 10
-        timeout = 5
-        interval = 30
-        path = "/"
-        port = "80"
-        protocol = "HTTP"
+    default_action {
+        type = "fixed-response"
+        fixed_response {
+            content_type = "text/plain"
+            message_body = "Do not call this endpoint directly..."
+            status_code  = "404"
+        }
     }
 }
 
+resource "aws_lb_listener_rule" "rule_cluster1" {
+    listener_arn = aws_lb_listener.alb_listener_http.arn
+    priority     = 101
 
-## ALB Attachment
-resource "aws_alb_target_group_attachment" "cluster1" {
-    for_each = {
-        for i in range(0, var.number_of_instances) : "${i}" => i
+    action {
+        type             = "forward"
+        target_group_arn = aws_lb_target_group.cluster1.arn
     }
-    target_group_arn = aws_alb_target_group.clusters["cluster1"].arn
-    target_id = aws_instance.large[each.value].id
+
+    condition {
+        path_pattern {
+            values = ["/cluster1*"]
+        }
+    }
 }
 
-resource "aws_alb_target_group_attachment" "cluster2" {
-    for_each = {
-        for i in range(0, var.number_of_instances) : "${i}" => i
+resource "aws_lb_listener_rule" "rule_cluster2" {
+    listener_arn = aws_lb_listener.alb_listener_http.arn
+    priority     = 100
+
+    action {
+        type             = "forward"
+        target_group_arn = aws_lb_target_group.cluster2.arn
     }
-    target_group_arn = aws_alb_target_group.clusters["cluster2"].arn
-    target_id = aws_instance.small[each.value].id
+
+    condition {
+        path_pattern {
+            values = ["/cluster2*"]
+        }
+    }
 }

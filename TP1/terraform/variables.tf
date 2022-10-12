@@ -27,11 +27,6 @@ variable "small_instance_type" {
     default = "t2.micro" # TODO: Change this
 }
 
-variable "number_of_instances" {
-    description = "Number of instances to create per instance type"
-    default = 2
-}
-
 variable "key_name" {
     description = "Name of the key pair to use"
     default = "vockey"

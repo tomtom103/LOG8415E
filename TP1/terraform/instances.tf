@@ -11,7 +11,7 @@ resource "aws_instance" "large" {
     subnet_id = element(tolist(data.aws_subnets.all.ids), 0)
 
     user_data = templatefile("${path.module}/../scripts/startup.sh", {
-        instance_id = "${random_pet.this.id}-large-${count.index}"
+        instance_name = "${random_pet.this.id}-large-${count.index}"
     })
 
     ami = "ami-08c40ec9ead489470"

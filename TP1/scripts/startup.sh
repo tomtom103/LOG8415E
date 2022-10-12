@@ -15,18 +15,18 @@ source ~/.venv/bin/activate
 # Install dependencies
 pip install flask
 
-# instance_id is provided by the templated terraform templatefile() function
+# instance_name is provided by the templated terraform templatefile() function
 echo "from flask import Flask, Response
 
 app = Flask(__name__)
 
 @app.route('/cluster1')
 def cluster1():
-    return 'Hello from Cluster 1, Instance ID: ${instance_id}'
+    return 'Hello from Cluster 1, Instance ID: ${instance_name}'
 
 @app.route('/cluster2')
 def cluster2():
-    return 'Hello from Cluster 2, Instance ID: ${instance_id}'
+    return 'Hello from Cluster 2, Instance ID: ${instance_name}'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

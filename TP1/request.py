@@ -1,5 +1,6 @@
 import requests
 import time
+import boto3
 from threading import Thread
 
 def run_thread1_requests(url):
@@ -24,12 +25,12 @@ def join_threads(threads):
         thread.join()
 
 if __name__ == "__main__":
-    # should get this info in terraform or directly from the ui ? 
-    url = ""
 
-    # need to add /cluster1 and /cluster2 for the good thread
-    first_thread = Thread(target=run_thread1_requests, args=(url))
-    second_thread = Thread(target=run_thread2_requests, args=(url))
+    client = boto3.client('elbv2')
+    url = client.describe_load_balancers()['LoadBalancers'][0]['DNSName']
+
+    first_thread = Thread(target=run_thread1_requests, args=(url + "/cluster1"))
+    second_thread = Thread(target=run_thread2_requests, args=(url + "/cluster2"))
 
     start_threads([first_thread, second_thread])
 

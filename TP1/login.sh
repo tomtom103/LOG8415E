@@ -1,7 +1,7 @@
 #! /bin/bash
 echo "
 [default]
-aws_access_key_id=ASIAZLWJ7ZVWWUAD6D4P
-aws_secret_access_key=NcNnYe8u6UVaMP6ka3Coezfk1bGtR0eKwDVyusot
-aws_session_token=FwoGZXIvYXdzEM7//////////wEaDGBAY5an1WkM6kLABiLAAfdbigEni6OHLg4qI7pjS5TScY+B3TApOJgmcyVPzy8oO4f6nCXb7GpNjSR4qL6U3YO0Mci2ORiT/MOznYeoFq5mJGKZUu1kDZ+WXQtlEaZIe6u850Ree//IV/f5GSUfDQhkZ5DazBGoOUaJ0oIlUbyeNewob22oXVLTnQCBWpoFCipW8ONsWNa3RWhAxs/VxCIy9XXnH3fAComq+d/IcbbBHnr4MARJvT0kk/wHoHzRc4pkaBNErHU4vbT2Som3VSi/+piaBjIt/0I0UNIfaldekBfup4BuwXsxN5ubLoMioZlRlI3n1PJzk8c60aC56bJjRTul
+aws_access_key_id=ASIAVA4BL2KHCBP4NK7O
+aws_secret_access_key=dtfft2+3Ko9NwYHGBtHpO3+8oCgi+geJcFDM74d2
+aws_session_token=FwoGZXIvYXdzEO///////////wEaDP2OgL8BJalcTCy5FyK+AdOBlvZ2U+ZwGehT+/4rydE2wxIL2Xo+cGKH2lsdhXmUlauYm2ggGsmADr5B/uXLeT1gdgL0V4ZMOCWoFKlSDO1ovxTJGxK1aIRo1n7FPqlTIHEmiU/IVuj9aUOMF8MextMNuQasEzvTcZX8mxhsoIw8ue4fAY0bg0v6vIuC4rJ+aw6qJDep38/4sM0WDD7PsQkcevapgpX8kGspDlEQpD4TuhE/XhG/24EY8Z7jdWmw59F2WLp9Vwjw1DED/dgo2J2gmgYyLf3tLQeVHbcJlo8PmZKXPr+buw43G2W7rZNOP6R9zUL/m47H8Qg6YYt6XJHIdg==
 " > ~/.aws/credentials

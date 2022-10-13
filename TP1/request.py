@@ -1,5 +1,6 @@
-import json
 import requests
+import time
+from threading import Thread
 
 def call_endpoint_http():
     url = "http://alb-test-1171701604.us-east-1.elb.amazonaws.com"
@@ -11,6 +12,11 @@ def do_1000_request(url):
     for i in range(1000):
         r = requests.get(url)
 
-def do_1000_request(url):
+def do_500_request(url):
     for i in range(500):
         r = requests.get(url)
+
+def run_thread2_requests(url):
+    do_1000_request(url)
+    time.sleep(60)
+    do_500_request(url)

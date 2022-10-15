@@ -1,5 +1,7 @@
 FROM python:3.8
 
+WORKDIR /usr/app/src
+
 ENV VIRTUAL_ENV=/.venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -9,13 +11,10 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Add AWS credentials
-COPY login.sh .
-RUN chmod +x login.sh && ./login.sh
+RUN mkdir -p ~/.aws
+COPY ~/.aws/credentials ~/.aws/credentials
 
-# Run Flask startup script
-COPY scripts/startup.sh .
-RUN chmod +x startup.sh && ./startup.sh
-
-# Run the application:
+# Run the script:
 COPY metrics.py .
-CMD ["python", "metrics.py"]
+RUN mkdir metrics && \
+    python metrics.py

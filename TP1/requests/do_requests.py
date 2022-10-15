@@ -1,20 +1,22 @@
 import requests
 import time
 import boto3
+from tqdm import tqdm
 from threading import Thread
 
 def run_thread1_requests(url):
     print("Doing 1000 requests: " + url)
-    for i in range(1000):
+    for i in tqdm(range(1000)):
         requests.get(url)
 
 def do_500_request(url):
     print("Doing 500 requests: " + url)
-    for i in range(500):
+    for i in tqdm(range(500)):
         requests.get(url)
 
 def run_thread2_requests(url):
     do_500_request(url)
+    print("Sleeping for 60 seconds")
     time.sleep(60)
     run_thread1_requests(url)
 

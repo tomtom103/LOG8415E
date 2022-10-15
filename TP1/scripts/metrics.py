@@ -76,19 +76,20 @@ def get_lb_metrics(metric_name,stat) :
     return response['MetricDataResults'][0]['Values']
 
 def target_group_plots() :
-
+    fig, ax = plt.subplots()
     x = [sum(get_metric(target_group_m4,'RequestCount','Sum',True)),sum(get_metric(target_group_t2,'RequestCount','Sum',True))]
     plt.bar(['m4','t2'],x)
     plt.title('Number of requests per target group')
-    plt.show()
+    plt.savefig('metrics/target-group-reqs.png', bbox_inches='tight')
 
     m4 = get_metric(target_group_m4,'TargetResponseTime','Average',True)
     t2 = get_metric(target_group_t2,'TargetResponseTime','Average',True)
+    fig, ax = plt.subplots()
     if len(m4) > 0 :
         x = [sum(m4)/len(m4), sum(t2)/len(t2)]
         plt.bar(['m4','t2'],x)
         plt.title('Average response time per target group')
-        plt.show()
+        plt.savefig('metrics/target-group-avg-res.png')
 
     m4 = get_metric(target_group_m4,'RequestCountPerTarget','Sum',False)
     t2 = get_metric(target_group_t2,'RequestCountPerTarget','Sum',False)
@@ -103,7 +104,7 @@ def target_group_plots() :
         axis[1].plot(time_t2,val_t2)
         axis[1].set_title('Average request count per instances in target group T2')
         plt.gcf().autofmt_xdate()
-        plt.show()
+        plt.savefig('metrics/target-group-avg-req.png', bbox_inches='tight')
 
 def plot_elb_table () :
     act = get_lb_metrics('ActiveConnectionCount','Sum')
@@ -127,10 +128,9 @@ def plot_elb_table () :
     table.scale(1,4)
     ax.axis('off')
     plt.title('Different elb metrics')
-    plt.show()
+    plt.savefig('metrics/elb-plots.png', bbox_inches='tight')
 
 
 plot_elb_table()
 target_group_plots()
-
 

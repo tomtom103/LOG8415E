@@ -46,6 +46,9 @@ resource "aws_lb_target_group" "cluster1" {
     port        = 80
     protocol    = "HTTP"
     vpc_id      = data.aws_vpc.default.id
+    health_check {
+      path = "/cluster1"
+    }
 }
 
 resource "aws_lb_target_group" "cluster2" {
@@ -53,6 +56,9 @@ resource "aws_lb_target_group" "cluster2" {
     port        = 80
     protocol    = "HTTP"
     vpc_id      = data.aws_vpc.default.id
+    health_check {
+      path = "/cluster2"
+    }
 }
 
 resource "aws_lb_target_group_attachment" "att-cluster1" {

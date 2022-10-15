@@ -1,14 +1,17 @@
-from statistics import mode
 import boto3
 import matplotlib.pyplot as plt
 from datetime import timedelta, datetime
+
+#SET UP
+lb_client = boto3.client('elbv2')
 cloudwatch_client = boto3.client('cloudwatch')
+response_lb = lb_client.describe_load_balancers()
+raw_arn = response_lb['LoadBalancers'][0]['LoadBalancerArn'].split(':')[-1].split('/')
+response_tg = lb_client.describe_target_groups()
 
-
-#TO CHANGE FOR EACH NEW SESSION
-elb_name = "app/elb/51522bcfff79521a"
-target_group_m4 = "targetgroup/m4/b957d794ac969e41"
-target_group_t2 = "targetgroup/t2/55a1add456a22dc4"
+elb_name = raw_arn[1] + '/'  + raw_arn[2] + '/' + raw_arn[3] 
+target_group_m4 = response_tg['TargetGroups'][0]['TargetGroupArn'].split(':')[-1]
+target_group_t2 = response_tg['TargetGroups'][1]['TargetGroupArn'].split(':')[-1]
 
 
 def get_metric(tg,metric_name,stat,get_value) :

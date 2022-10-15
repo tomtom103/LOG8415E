@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 from datetime import timedelta, datetime
 
 #SET UP
-lb_client = boto3.client('elbv2')
-cloudwatch_client = boto3.client('cloudwatch')
+region = 'us-east-1'
+lb_client = boto3.client('elbv2',region_name = region)
+cloudwatch_client = boto3.client('cloudwatch', region_name = region)
 response_lb = lb_client.describe_load_balancers()
 raw_arn = response_lb['LoadBalancers'][0]['LoadBalancerArn'].split(':')[-1].split('/')
 response_tg = lb_client.describe_target_groups()

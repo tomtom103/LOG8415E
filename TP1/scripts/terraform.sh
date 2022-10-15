@@ -5,7 +5,7 @@ NOCOLOR='\033[0m'
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 
-cd terraform
+cd ../terraform
 printf "\n${BOLD}Running Terraform...${NORMAL} \n"
 
 if [ $1 = "up" ]; then

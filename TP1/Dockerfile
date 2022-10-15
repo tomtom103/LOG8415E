@@ -7,14 +7,11 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Install dependencies:
-COPY requirements.txt .
+COPY ../requirements.txt .
 RUN pip install -r requirements.txt
 
-# Add AWS credentials
-RUN mkdir -p ~/.aws
-COPY ~/.aws/credentials ~/.aws/credentials
-
 # Run the script:
-COPY metrics.py .
-RUN mkdir metrics && \
-    python metrics.py
+COPY ../scripts/metrics.py .
+RUN mkdir -p metrics
+
+ENTRYPOINT [ "python", "metrics.py" ]

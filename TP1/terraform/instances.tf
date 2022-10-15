@@ -34,7 +34,7 @@ resource "aws_instance" "small" {
     subnet_id = element(tolist(data.aws_subnets.all.ids), 1)
 
     user_data = templatefile("${path.module}/../scripts/startup.sh", {
-        instance_id = "${random_pet.this.id}-small-${count.index}"
+        instance_name = "${random_pet.this.id}-small-${count.index}"
     })
 
     ami = "ami-08c40ec9ead489470"

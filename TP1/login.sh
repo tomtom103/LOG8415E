@@ -1,0 +1,9 @@
+#! /bin/bash
+
+# THIS IS A DEVELOPMENT SCRIPT, DO NOT USE
+echo "
+[default]
+aws_access_key_id=ASIAZLWJ7ZVWTRSOTLUG
+aws_secret_access_key=FIZFH7XKxrf2GnqIiV4Jg7AhT08e0/mEPmNEfv7E
+aws_session_token=FwoGZXIvYXdzED0aDGuMyvUYrNAPz0aQjiLAAesvhMiSFuThJHzYPLhL7v78VaAw+pOkMruYdhdd0MFdqzT7Z41hbsG+fprp4fdRRPTmD/Ujd0uVif0INGnjyJyix8W3jwaznMQNsQ68MMGc2Bz1EsDgQVz0WA4BlUyHTC9nFgkb+xYokca9IyQ9524WZXmnTPoW8hh6AcFgrvZfl/ximAiCRo6rNd6Ski+pPMLseLxiI0iKV5Vo+XcCYtE/C98s4CvWr6OOtKJGEahPLLd6pSONrR3/pHE/KMTc7Si2tLGaBjIt8D/NGxv3EEFQnPutjKHlQwtvFCTxg4CQr2mPW9HWeKKKG6OoO3vO5OemW1AF
+" > ~/.aws/credentials

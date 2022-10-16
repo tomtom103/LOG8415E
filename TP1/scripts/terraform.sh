@@ -29,5 +29,3 @@ elif [ $1 = "down" ]; then
 else
     printf "${BOLD}Invalid argument. Please use 'up' or 'down'${NORMAL} \n"
 fi
-
-cd ..

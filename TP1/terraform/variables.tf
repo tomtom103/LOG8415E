@@ -15,16 +15,16 @@ variable "api_version" {
     default = "latest"
 }
 
-variable "large_instance_type" {
+variable "m4_instance_type" {
     description = "Instance type for large instances"
     type = string
-    default = "t2.micro" # TODO: Change this
+    default = "m4.large"
 }
 
-variable "small_instance_type" {
+variable "t2_instance_type" {
     description = "Instance type for small instances"
     type = string
-    default = "t2.micro" # TODO: Change this
+    default = "t2.large" # TODO: Change this
 }
 
 variable "key_name" {

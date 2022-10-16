@@ -62,16 +62,16 @@ resource "aws_lb_target_group" "cluster2" {
 }
 
 resource "aws_lb_target_group_attachment" "att-cluster1" {
-    count = length(aws_instance.large)
+    count = length(aws_instance.m4)
     target_group_arn = aws_lb_target_group.cluster1.arn
-    target_id = aws_instance.large[count.index].id
+    target_id = aws_instance.m4[count.index].id
     port = 80
 }
 
 resource "aws_lb_target_group_attachment" "att-cluster2" {
-    count = length(aws_instance.small)
+    count = length(aws_instance.t2)
     target_group_arn = aws_lb_target_group.cluster2.arn
-    target_id = aws_instance.small[count.index].id
+    target_id = aws_instance.t2[count.index].id
     port = 80
 }
 

@@ -4,9 +4,6 @@
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 
-# Install python3
-sudo apt-get install python3 python3-pip python3-venv -y
-
 # Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
@@ -16,16 +13,17 @@ pip install -r requirements.txt
 
 # Run Terraform 
 chmod +x ./scripts/terraform.sh
-cd ./scripts && ./terraform.sh up
+cd ./scripts && ./terraform.sh up && cd ..
 
-echo "Waiting 15 seconds for ALB to be ready..."
-sleep 15
+# echo "Waiting 15 seconds for ALB to be ready..."
+# sleep 15
 
 # Run Docker test container
-printf "${BOLD} Running docker container${NORMAL}"
+printf "${BOLD} Running docker container${NORMAL}\n"
+echo "$(pwd)"
 chmod +x ./scripts/docker.sh
 cd ./scripts && ./docker.sh && cd ..
 
 # Tear down infrastructure
 printf "Tearing down infrastructure"
-cd ./scripts && ./terraform.sh down
+cd ./scripts && ./terraform.sh down && cd ..

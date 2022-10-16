@@ -13,6 +13,7 @@ sleep 60
 
 # Run Docker container
 container_id="$(docker run -t -d -P -v ~/.aws/:/root/.aws:ro metrics:latest)"
+echo "Launched docker image for metrics: $container_id"
 
 # Waiting for metrics to be done
 echo "Waiting for metrics to be done"
@@ -22,7 +23,6 @@ sleep 15
 sudo docker cp $container_id:/usr/app/src/metrics/target-group-avg-res.png ../metrics/target-group-avg-res.png
 sudo docker cp $container_id:/usr/app/src/metrics/elb-plots.png ../metrics/elb-plots.png
 sudo docker cp $container_id:/usr/app/src/metrics/target-group-reqs.png ../metrics/target-group-reqs.png
-sudo docker cp $container_id:/usr/app/src/metrics/target-group-avg-req.png ../metrics/target-group-avg-req.png
 
 # Stop and delete docker container
 docker stop $container_id

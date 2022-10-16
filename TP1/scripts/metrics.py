@@ -91,21 +91,6 @@ def target_group_plots() :
         plt.title('Average response time per target group')
         plt.savefig('metrics/target-group-avg-res.png')
 
-    m4 = get_metric(target_group_m4,'RequestCountPerTarget','Sum',False)
-    t2 = get_metric(target_group_t2,'RequestCountPerTarget','Sum',False)
-    val_m4 = m4['MetricDataResults'][0]['Values']
-    time_m4 = m4['MetricDataResults'][0]['Timestamps']
-    val_t2 = t2['MetricDataResults'][0]['Values']
-    time_t2 = t2['MetricDataResults'][0]['Timestamps']
-    figure, axis = plt.subplots(1, 2, sharey=True)
-    if len(val_m4) > 0 :
-        axis[0].plot(time_m4,val_m4)
-        axis[0].set_title('Average request count per instances in target group M4')
-        axis[1].plot(time_t2,val_t2)
-        axis[1].set_title('Average request count per instances in target group T2')
-        plt.gcf().autofmt_xdate()
-        plt.savefig('metrics/target-group-avg-req.png', bbox_inches='tight')
-
 def plot_elb_table () :
     act = get_lb_metrics('ActiveConnectionCount','Sum')
     avg_act = sum(act)/len(act)

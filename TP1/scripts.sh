@@ -15,8 +15,8 @@ pip install -r requirements.txt
 chmod +x ./scripts/terraform.sh
 cd ./scripts && ./terraform.sh up && cd ..
 
-# echo "Waiting 15 seconds for ALB to be ready..."
-# sleep 15
+echo "Waiting 15 seconds for ALB to be ready..."
+sleep 15
 
 # Run Docker test container
 printf "${BOLD} Running docker container${NORMAL}\n"

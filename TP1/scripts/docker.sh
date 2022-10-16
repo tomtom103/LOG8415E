@@ -11,11 +11,11 @@ docker run --rm -t -v ~/.aws/:/root/.aws:ro requests:latest
 echo "Sleeping for 60 seconds to allow metrics to be present"
 sleep 60
 
-# Run Docker container
+# Run Docker container for the metrics
 container_id="$(docker run -t -d -P -v ~/.aws/:/root/.aws:ro metrics:latest)"
 echo "Launched docker image for metrics: $container_id"
 
-# Waiting for metrics to be done
+# Waiting for metrics to be done since we don't wait for the container to run
 echo "Waiting for metrics to be done"
 sleep 15 
 

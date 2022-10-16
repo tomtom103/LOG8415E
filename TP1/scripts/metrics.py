@@ -1,3 +1,6 @@
+"""
+This script is used to plot different cloudwatch metrics from the ALB 
+"""
 import boto3
 import matplotlib.pyplot as plt
 from datetime import timedelta, datetime

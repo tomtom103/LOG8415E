@@ -1,3 +1,6 @@
+"""
+This script is used to simulate a load on the ALB
+"""
 import requests
 import time
 import boto3

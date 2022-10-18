@@ -8,9 +8,11 @@ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-po
 # Install python3
 sudo apt-get install python3 python3-pip python3-venv -y
 
+cd /home
+
 # Create and activate virtual environment
-python3 -m venv ~/.venv
-source ~/.venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
 pip install flask
@@ -30,6 +32,6 @@ def cluster2():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-" > ~/app.py
+" > app.py
 
-PYTHONUNBUFFERED=1 nohup python ~/app.py &
+PYTHONUNBUFFERED=1 nohup python app.py &

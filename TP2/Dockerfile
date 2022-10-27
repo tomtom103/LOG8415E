@@ -20,6 +20,7 @@ RUN mkdir -p /root/results
 
 ADD configs/* /root/configs/
 ADD files/* /root/files/
+ADD scripts/* /root/scripts/
 ADD Makefile /root/
 COPY wordcount.sh /root/wordcount.sh
 

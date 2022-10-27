@@ -1,2 +1,2 @@
 countwords:
-	chmod +x ./configs/start.sh && ./configs/start.sh
+	chmod +x ./scripts/wordcount.sh && ./scripts/wordcount.sh

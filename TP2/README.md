@@ -58,10 +58,10 @@ Multiple options are available to run the different tests scenarios. The followi
     - We do the same using `pyspark` 
     - Execution times are compared between both programs
 
+To run a command, you can do `make [command]` after starting the docker image (See [Docker](#docker))
+
 ## People you might know algorithm:
 
 TODO: Explain this
 
-
-To run a command, you can do `make [command]` after starting the docker image (See [Docker](#docker))
 

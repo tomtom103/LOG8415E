@@ -2,7 +2,9 @@ from pyspark.sql import SparkSession
 import sys
 import time
 
-time_f = open("./files/time.txt", "a")
+path = sys.argv[1]
+input_file_name = path.split('/')[-1]
+time_f = open("../files/time.txt", "a")
 
 #start a spark session
 session= SparkSession.builder.getOrCreate()
@@ -11,7 +13,7 @@ session= SparkSession.builder.getOrCreate()
 spark = session.sparkContext
 
 #read the file from the path sent from the command line
-file = spark.textFile(sys.argv[1])
+file = spark.textFile(path)
 
 start_time = time.time()
 
@@ -29,8 +31,7 @@ result = count.collect()
 for w in result :
     print(w)
 #writing the map reduce execution time in data file
-time_f.write(str(end_time) + '\n')
+time_f.write('Filename:' + input_file_name + " time:" + str(end_time) + '\n')
 time_f.close()
-
 
 

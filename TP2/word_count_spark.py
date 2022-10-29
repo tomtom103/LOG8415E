@@ -25,12 +25,12 @@ count = wordList.reduceByKey(lambda c1,c2: c1+c2)
 
 end_time = time.time() - start_time
 
-
-#print 
+#print all the words with their count
 result = count.collect()
 for w in result :
     print(w)
 
+#writing the map reduce execution time in data file
 time_f.write(str(end_time) + '\n')
 time_f.close()
 

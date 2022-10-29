@@ -28,4 +28,9 @@ static public class RecommendationWritable implements Writable {
         user = input.readInt();
         mutualFriend = input.readInt();
     }
+
+    @Override
+    public String toString() {
+        return Integer.toString(user) + "\\t" + Integer.toString(mutualFriend);
+    }
 }

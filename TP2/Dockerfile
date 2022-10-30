@@ -36,14 +36,13 @@ ADD files/* /root/files/
 ADD scripts/* /root/scripts/
 ADD Makefile /root/
 
-ADD java/* /root/java/
+ADD RecommendationMR/* /root/RecommendationMR/
 
-RUN mkdir -p /root/build
-RUN cd /root/java && \
-  javac -sourcepath /root/java/ -d /root/build/ Recommendation.java RecommendationMapper.java RecommendationReducer.java RecommendationWritable.java \
-  -cp $(${HADOOP_HOME}/bin/hadoop classpath)
-
-RUN cd /root/build && jar cvf recommendation.jar *
+RUN cd /root/RecommendationMR && \
+  HADOOP_CLASSPATH=${JAVA_HOME}/lib/tools.jar \
+  $HADOOP_HOME/bin/hadoop com.sun.tools.javac.Main \
+  Recommendation.java && \
+  jar cf recommendation.jar Recommendation*.class
 
 WORKDIR /root
 EXPOSE 50070

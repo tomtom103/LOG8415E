@@ -1,5 +1,9 @@
 SHELL := /bin/bash
 
+.PHONY: setup
+setup:
+	source ./scripts/setup_functions.sh && \
+		hadoop_standalone
 
 .PHONY: hadoop_vs_linux
 hadoop_vs_linux:

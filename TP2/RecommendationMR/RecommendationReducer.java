@@ -24,9 +24,8 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
         for(RecommendationWritable rec : values) {
             final Integer friendId = rec.user;
             final Integer mutualFriend = rec.mutualFriend;
-            final Boolean alreadyFriend = (mutualFriend == -1);
             
-            if(alreadyFriend){
+            if(mutualFriend == -1){
                 mutualFriends.put(friendId, null);
             } else {
                 if(mutualFriends.containsKey(friendId)) {
@@ -41,10 +40,10 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
 
         Map<Integer, List<Integer>> sortedFriends = decreasingMutualFriendsResult(mutualFriends);
 
-        Integer i = 0;
+        Integer counter = 0;
         StringBuilder output = new StringBuilder();
         for (Map.Entry<Integer, List<Integer>> entry : sortedFriends.entrySet()) {
-        	if (i == 10) break;
+        	if (counter == 10) break;
         	
         	if (entry.getValue() != null) {
         		output.append(entry.getKey().toString() + " (" + entry.getValue() + ")");
@@ -52,7 +51,7 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
         		break;
         	}
         	output.append(",");
-        	i++;
+        	counter++;
         }
         String outputStr = output.toString();
         
@@ -67,15 +66,19 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
      * Sort the friends recommendation in decreasing, from the user with the most mutual friends to less mutual friends
      */
     public static Map<Integer, List<Integer>> decreasingMutualFriendsResult(Map<Integer, List<Integer>> mutualFriends) {
-        List<Map.Entry<Integer, List<Integer>> > list = new ArrayList<Map.Entry<Integer, List<Integer>> >(mutualFriends.entrySet());
+        List<Map.Entry<Integer, List<Integer>> > mutualFriendsEntrySet = new ArrayList<Map.Entry<Integer, List<Integer>> >(mutualFriends.entrySet());
         
-        list.sort(
-            (Map.Entry<Integer, List<Integer>> i1, Map.Entry<Integer, List<Integer>> i2) -> {
-                Integer key1 = i1.getKey();
-                Integer key2 = i2.getKey();
-                Integer s1 = (i1.getValue() != null)? 0 : i1.getValue().size();
-                Integer s2 = (i2.getValue() != null)? 0 : i2.getValue().size();
-                if(s1>s2 || (s1.equals(s2) && key1 < key2)) {
+        /* If set1 has a larger mutual friends list than set2, set1 is before set2
+         * If both lists are equals in size and set1's key is smaller, set1 is before set2
+         * Otherwise, set2 is before set1
+         */
+        mutualFriendsEntrySet.sort(
+            (Map.Entry<Integer, List<Integer>> set1, Map.Entry<Integer, List<Integer>> set2) -> {
+                Integer key1 = set1.getKey();
+                Integer key2 = set1.getKey();
+                Integer friendsListSize1 = (set1.getValue() != null)? 0 : set1.getValue().size();
+                Integer friendsListSize2 = (set1.getValue() != null)? 0 : set1.getValue().size();
+                if(friendsListSize1>friendsListSize2 || (friendsListSize1.equals(friendsListSize2) && key1 < key2)) {
                     return -1;
                 } else {
                     return 1;
@@ -83,9 +86,9 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
             }
         );
 
+        // LinkedHashMap filled with the sorted result
         Map<Integer, List<Integer>> sortedMutFr = new LinkedHashMap<Integer, List<Integer>>();
-        
-        for(Map.Entry<Integer, List<Integer>> sortedEntries : list) {
+        for(Map.Entry<Integer, List<Integer>> sortedEntries : mutualFriendsEntrySet) {
             sortedMutFr.put(sortedEntries.getKey(), sortedEntries.getValue());
         }
 

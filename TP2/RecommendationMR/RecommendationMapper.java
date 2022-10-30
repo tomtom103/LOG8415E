@@ -34,8 +34,6 @@ public class RecommendationMapper extends Mapper<IntWritable, Integer, IntWritab
                         	if (friendId1 == friendId2) continue;
                             context.write(new IntWritable(friendId1),
                                     new RecommendationWritable((friendId2), userId));
-                            context.write(new IntWritable(friendId2),
-                                    new RecommendationWritable((friendId1), userId));
                         }
                     }
                 }   

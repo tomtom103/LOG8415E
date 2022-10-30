@@ -16,3 +16,5 @@ rsa==4.7.2
 s3transfer==0.6.0
 six==1.16.0
 urllib3==1.26.12
+matplotlib==3.6.0
+numpy==1.23.4

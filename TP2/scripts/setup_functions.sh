@@ -43,3 +43,9 @@ function spark_wordcount() {
     pprint "COUNTING WORDS WITH SPARK"
     
 }
+
+function hadoop_recommendation() {
+    pprint "RUNNING RECOMMENDATION"
+    hadoop jar /root/build/recommendation.jar input/soc-LiveJournal1Adj.txt output/result
+    pprint "FINISHED RUNNING RECOMMENDATION"
+}

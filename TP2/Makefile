@@ -10,3 +10,8 @@ hadoop_vs_linux:
 .PHONY: hadoop_vs_spark
 hadoop_vs_spark:
 	echo "Hello World!"
+
+.PHONY: recommendation
+recommendation:
+	source ./scripts/setup_functions.sh && \
+		hadoop_standalone && hadoop_recommendation

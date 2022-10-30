@@ -5,9 +5,11 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.io.Text;
 
-
 public class RecommendationMapper extends Mapper<IntWritable, Integer, IntWritable, RecommendationWritable> {
 
+    /*
+    * Map function where we will find all the relations between the users. 
+    */
     public void map(IntWritable user, Text value, Context context) throws IOException, InterruptedException{
         if(value.toString() != null) {
             String line[] = value.toString().split("\t");
@@ -15,10 +17,13 @@ public class RecommendationMapper extends Mapper<IntWritable, Integer, IntWritab
                 Integer userId = Integer.parseInt(line[0]);
                 String friends[] = line[1].split(",");
                 List<Integer> friendsId = new ArrayList<Integer>(); 
+
                 if(friends.length > 0) {
                     for (String friend : friends) {
                         int friendId = Integer.parseInt(friend);
                         friendsId.add(friendId);
+
+                        // We put -1 to indicate that they are already friends
                         context.write(new IntWritable(userId), new RecommendationWritable(friendId, -1));
                     }
                     // For each combination of friends, creates a writable

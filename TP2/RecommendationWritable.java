@@ -3,8 +3,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import org.apache.hadoop.io.Writable;
 
-// This class need to be created because the emitted value is not a primitive value in hadoop
-static public class RecommendationWritable implements Writable {
+/*
+ * This class need to be created because the emitted value is not a primitive value in hadoop
+ */
+public class RecommendationWritable implements Writable {
     public Integer user;
     public Integer mutualFriend;
 

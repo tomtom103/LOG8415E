@@ -11,6 +11,9 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 public class RecommendationReducer extends Reducer<IntWritable, RecommendationWritable, IntWritable, Text> {
 
+    /*
+     * Reduce function where for the users the top 10 recommendations
+     */
     public void reduce(IntWritable key, Iterable<RecommendationWritable> values, Context context) 
         throws IOException, InterruptedException {
         
@@ -58,6 +61,9 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
         context.write(key, new Text(outputStr));
     }
 
+    /*
+     * Sort the friends recommendation in decreasing, from the user with the most mutual friends to less mutual friends
+     */
     public static Map<Integer, List<Integer>> decreasingMutualFriendsResult(Map<Integer, List<Integer>> mutualFriends) {
         List<Map.Entry<Integer, List<Integer>> > list = new ArrayList<Map.Entry<Integer, List<Integer>> >(mutualFriends.entrySet());
         
@@ -82,6 +88,5 @@ public class RecommendationReducer extends Reducer<IntWritable, RecommendationWr
         }
 
         return sortedMutFr;
-
     }
 }

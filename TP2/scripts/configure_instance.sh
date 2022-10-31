@@ -37,6 +37,7 @@ sudo usermod -aG docker ubuntu
 # Download our docker image in the EC2 instance
 docker pull thomascaron103/log8415_tp2:latest
 
+# Script to run docker image
 echo "!/bin/bash
 
 set -e

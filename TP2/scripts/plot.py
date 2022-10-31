@@ -25,6 +25,7 @@ def plot_data_from_file(path, app_name) :
     bars = ax.bar(list(data.keys()),list(data.values()))
     ax.bar_label(bars)
     plt.title('Average time of the ' + app_name + ' wordcount on each input file')
-    plt.savefig('../metrics/'+app_name+'_avg_time.png')
+    plt.savefig('../out/'+app_name+'_avg_time.png')
 
-plot_data_from_file('../files/time.txt', 'spark')
+plot_data_from_file('../out/spark.txt', 'spark')
+plot_data_from_file('../out/hadoop.txt', 'hadoop')

@@ -1,6 +1,13 @@
 import matplotlib.pyplot as plt
 
 def plot_data_from_file(path, app_name) :
+    """
+    Take the data from the file at the path and plot it
+
+    format of the file is:
+    Filename<name> time:<time>
+    ...
+    """
     f = open(path, 'r')
     lines = f.readlines()
     f.close()
@@ -11,7 +18,7 @@ def plot_data_from_file(path, app_name) :
     for l in lines :
         file,time = l.split(' ')
         file = file.split(':')[1]
-        time = float(time.split(':')[1].rstrip())
+        time = float(time.split(':')[-1].rstrip())
         if file not in data.keys() :
             data[file] = []
         data[file].append(time)
@@ -27,5 +34,6 @@ def plot_data_from_file(path, app_name) :
     plt.title('Average time of the ' + app_name + ' wordcount on each input file')
     plt.savefig('../out/'+app_name+'_avg_time.png')
 
+# Plotting the data from spark and hadoop
 plot_data_from_file('../out/spark.txt', 'spark')
 plot_data_from_file('../out/hadoop.txt', 'hadoop')

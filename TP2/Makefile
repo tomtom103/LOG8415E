@@ -8,7 +8,7 @@ setup:
 .PHONY: hadoop_vs_linux
 hadoop_vs_linux:
 	source ./scripts/setup_functions.sh && \
-		hadoop_standalone && hadoop_wordcount_example pg4300.txt && \
+		hadoop_wordcount_example pg4300.txt && \
 		linux_wordcount ./files/pg4300.txt
 
 .PHONY: hadoop_vs_spark
@@ -25,4 +25,4 @@ metrics:
 .PHONY: recommendation
 recommendation:
 	source ./scripts/setup_functions.sh && \
-		hadoop_standalone && hadoop_recommendation
+		hadoop_recommendation

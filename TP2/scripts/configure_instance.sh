@@ -42,13 +42,15 @@ echo "!/bin/bash
 
 set -e
 
-docker run -it -p 50070:50070 -p 8088:8088 thomascaron103/log8415_tp2:latest
+docker run -it -v /root/shared/out:/root/out:rw -p 8088:8088 thomascaron103/log8415_tp2:latest
 " > /home/shared/run_docker.sh
 
 chmod +x /home/shared/run_docker.sh
 
 # Make shared directory available to all users...
 chmod -R 777 /home/shared/
+
+mkdir -p /home/shared/out
 
 echo "Finished setup!"
 

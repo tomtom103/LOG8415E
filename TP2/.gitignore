@@ -162,6 +162,3 @@ cython_debug/
 labuser.pem
 
 files/output/*.txt
-
-out/*
-!out/.gitkeep

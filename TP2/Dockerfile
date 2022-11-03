@@ -36,9 +36,9 @@ ADD files/* /root/files/
 ADD scripts/* /root/scripts/
 ADD Makefile /root/
 
-ADD RecommendationMR/* /root/RecommendationMR/
+ADD java/* /root/java/
 
-RUN cd /root/RecommendationMR && \
+RUN cd /root/java && \
   HADOOP_CLASSPATH=${JAVA_HOME}/lib/tools.jar \
   $HADOOP_HOME/bin/hadoop com.sun.tools.javac.Main \
   Recommendation.java && \

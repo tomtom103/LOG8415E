@@ -1,0 +1,8 @@
+Filename:pg4300.txt time:0:03.67
+Filename:pg4300.txt time:0:03.70
+Filename:pg4300.txt time:0:04.09
+Filename:pg4300.txt time:0:03.57
+Filename:pg4300.txt time:0:02.64
+Filename:pg4300.txt time:0:03.87
+Filename:pg4300.txt time:0:02.62
+Filename:pg4300.txt time:0:04.00

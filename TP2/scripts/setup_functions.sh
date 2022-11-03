@@ -31,7 +31,7 @@ function hadoop_wordcount_example() {
     hdfs dfs -cat output/pg4300/part-r-00000 | tail -n 10
 }
 
-function linux_wordcount() {
+function linux_wordcount_example() {
     pprint "COUNTING WORDS WITH LINUX"
     mkdir -p ./out
     pprint "START OF OUTPUT:"
@@ -89,10 +89,44 @@ function spark_wordcount() {
     done;
 }
 
+function linux_wordcount_metrics() {
+    pprint "RUNNING WORDCOUNT ON LINUX"
+    mkdir -p /root/output
+    for i in $(seq 1 8);
+    do
+        TIME_TAKEN=$(/usr/bin/time -f '%E' ./scripts/linux_count_words.sh /root/files/pg4300.txt /root/output/pg4300"_$i".txt 2>&1)
+        echo "Filename:pg4300.txt time:$TIME_TAKEN" >> /root/out/linux_metrics.txt
+        pprint "OUTPUT OF pg4300.txt $i / 8"
+        cat /root/output/pg4300_$i.txt | tail -n 10
+    done;
+}
+
+function hadoop_wordcount_metrics() {
+    pprint "COUNTING WORDS IN HADOOP STANDALONE MODE"
+    # Run the hadoop wordcount with the example file
+    for i in $(seq 1 8);
+    do
+        TIME_TAKEN=$(/usr/bin/time -f '%E' ./scripts/hadoop_count_words.sh pg4300.txt pg4300 $i 2>&1)
+        echo "Filename:pg4300.txt time:$TIME_TAKEN" >> /root/out/hadoop_metrics.txt
+        pprint "OUTPUT OF pg4300.txt $i / 8"
+        hdfs dfs -cat output/pg4300_$i/part-r-00000 | tail -n 10
+    done;
+}
+
 
 function hadoop_recommendation() {
     pprint "RUNNING RECOMMENDATION"
     # Run the friend recommendation example
-    hadoop jar /root/RecommendationMR/recommendation.jar Recommendation input/soc-LiveJournal1Adj.txt output/result
+    hadoop jar /root/java/recommendation.jar Recommendation input/soc-LiveJournal1Adj.txt output/result
     pprint "FINISHED RUNNING RECOMMENDATION"
+}
+
+function fetch_recommendation_ids() {
+    hdfs dfs -cat output/result/part-r-00000 > /root/out/friend_recommendation.txt || echo "No output found, run hadoop_recommendation first"
+    ids=(924 8941 8942 9019 9020 9021 9022 9990 9992 9993)
+    for id in "${ids[@]}";
+    do
+        echo "ID: ${id}"
+        grep -P "^${id}[ \t]" /root/out/friend_recommendation.txt >> /root/out/friend_recommendation_filtered.txt
+    done;
 }

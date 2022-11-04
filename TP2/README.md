@@ -71,6 +71,6 @@ To run a command, you can do `make [command]` after starting the docker image (S
 
 ## People you might know algorithm:
 
-TODO: Explain this
+See this [README.md](java/README.md)
 
 

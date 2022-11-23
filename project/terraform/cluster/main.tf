@@ -53,7 +53,7 @@ resource "aws_instance" "master" {
     ]
     subnet_id = element(tolist(data.aws_subnets.all.ids), 0)
 
-    ami = "ami-0149b2da6ceec4bb0"
+    ami = "ami-0ee23bfc74a881de5"
 
     tags = {
         "Name": "Master"
@@ -64,7 +64,9 @@ resource "null_resource" "aws_master_config" {
     triggers = {
         user_data = templatefile("${path.module}/../../scripts/configure_cluster_master.sh", {
             master_ip = aws_instance.master.private_ip,
-            slave_ips = jsonencode(aws_instance.slave[*].private_ip),
+            slave_one = aws_instance.slave[0].private_ip,
+            slave_two = aws_instance.slave[1].private_ip,
+            slave_three = aws_instance.slave[2].private_ip,
         })
     }
 
@@ -99,7 +101,7 @@ resource "null_resource" "aws_master_config" {
 
 # EC2 Instances
 resource "aws_instance" "slave" {
-    count = 2
+    count = 3
 
     instance_type = "t2.micro"
     key_name = "vockey"
@@ -109,7 +111,7 @@ resource "aws_instance" "slave" {
     ]
     subnet_id = element(tolist(data.aws_subnets.all.ids), 0)
 
-    ami = "ami-0149b2da6ceec4bb0"
+    ami = "ami-0ee23bfc74a881de5"
 
     tags = {
         "Name": "Slave-${count.index}"
@@ -117,12 +119,11 @@ resource "aws_instance" "slave" {
 }
 
 resource "null_resource" "aws_slave_config" {
-    count = length(aws_instance.slave)
+    count = 3
 
     triggers = {
         user_data = templatefile("${path.module}/../../scripts/configure_cluster_slave.sh", {
             master_ip = aws_instance.master.private_ip,
-            slave_ips = jsonencode(aws_instance.slave[*].private_ip),
         })
     }
 
@@ -153,4 +154,9 @@ resource "null_resource" "aws_slave_config" {
             "/bin/bash -c \"timeout 300 sed '/finished-user-data/q' <(tail -f /home/shared/output.log)\""
         ]
     }
+}
+
+output "master_public_dns" {
+    description = "The public DNS name assigned to the instance. For EC2-VPC, this is only available if you've enabled DNS hostnames for your VPC"
+    value       = try(aws_instance.master.public_dns, "")
 }

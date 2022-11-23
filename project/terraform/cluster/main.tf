@@ -93,8 +93,8 @@ resource "null_resource" "aws_master_config" {
     # This provisioner also allows us to see the output log without having to connect to the instance
     provisioner "remote-exec" {
         inline = [
-            "/bin/bash /tmp/user_data",
-            "/bin/bash -c \"timeout 300 sed '/finished-user-data/q' <(tail -f /home/shared/output.log)\""
+            "/bin/bash /tmp/user_data > /tmp/output.log",
+            "/bin/bash -c \"timeout 300 sed '/finished-user-data/q' <(tail -f /tmp/output.log)\""
         ]
     }
 }
@@ -150,10 +150,14 @@ resource "null_resource" "aws_slave_config" {
     # This provisioner also allows us to see the output log without having to connect to the instance
     provisioner "remote-exec" {
         inline = [
-            "/bin/bash /tmp/user_data",
-            "/bin/bash -c \"timeout 300 sed '/finished-user-data/q' <(tail -f /home/shared/output.log)\""
+            "/bin/bash /tmp/user_data > /tmp/output.log",
+            "/bin/bash -c \"timeout 300 sed '/finished-user-data/q' <(tail -f /tmp/output.log)\""
         ]
     }
+
+    depends_on = [
+      null_resource.aws_master_config
+    ]
 }
 
 output "master_public_dns" {

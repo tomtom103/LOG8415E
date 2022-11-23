@@ -1,18 +1,12 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 # Create a shared directory
 sudo mkdir -p /home/shared
 
 # Make shared directory available to all users
 sudo chmod -R 777 /home/shared/
-
-exec 3>&1 4>&2
-trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>/home/shared/output.log 2>&1
-
-# If you want to print to stdout:  >&3 after the command
-
-set -euxo pipefail
 
 # Install dependencies
 sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y libncurses5
@@ -57,9 +51,6 @@ datadir=/usr/local/mysql/data	# Remote directory for the data files
 hostname=${master_ip}
 """ | sudo tee -a /var/lib/mysql-cluster/config.ini
 
-# Start the manager and specify config file
-sudo ndb_mgmd -f /var/lib/mysql-cluster/config.ini >&3
-
 # Kill the manager before starting it as a service
 sudo pkill -f ndb_mgmd
 
@@ -90,20 +81,16 @@ sudo systemctl enable ndb_mgmd
 # Start the service
 sudo systemctl start ndb_mgmd
 
-# Get service status into console
-sudo systemctl status ndb_mgmd >&3
-
 # Download MySQL cluster server binary
-cd /home/shared
+cd /home/shared && sudo mkdir -p /home/shared/install
+
 wget https://dev.mysql.com/get/Downloads/MySQL-Cluster-7.6/mysql-cluster_7.6.6-1ubuntu18.04_amd64.deb-bundle.tar
 
-sudo mkdir install
-
 # Extract into new directory
-tar -xvf mysql-cluster_7.6.6-1ubuntu18.04_amd64.deb-bundle.tar -C install/
+sudo tar -xvf mysql-cluster_7.6.6-1ubuntu18.04_amd64.deb-bundle.tar -C /home/shared/install/
 
 # Go into install directory
-cd install
+cd /home/shared/install
 
 # Install required dependencies
 sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y libaio1 libmecab2
@@ -112,12 +99,17 @@ sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y libaio
 sudo dpkg -i mysql-common_7.6.6-1ubuntu18.04_amd64.deb
 sudo dpkg -i mysql-cluster-community-client_7.6.6-1ubuntu18.04_amd64.deb
 sudo dpkg -i mysql-client_7.6.6-1ubuntu18.04_amd64.deb
-sudo dpkg -i mysql-cluster-community-server_7.6.6-1ubuntu18.04_amd64.deb
+
+sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password root'
+sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password root'
+
+sudo DEBIAN_FRONTEND=noninteractive dpkg -i mysql-cluster-community-server_7.6.6-1ubuntu18.04_amd64.deb
 
 # Install MySQL server binary
 sudo dpkg -i mysql-server_7.6.6-1ubuntu18.04_amd64.deb
 
-echo """[mysqld]
+echo """
+[mysqld]
 # Options for mysqld process:
 ndbcluster                      # run NDB storage engine
 
@@ -126,11 +118,16 @@ ndbcluster                      # run NDB storage engine
 ndb-connectstring=${master_ip}  # location of management server
 """ | sudo tee -a /etc/mysql/my.cnf
 
-# Restart service for changes to come into effect
+# Reload system-ctl daemon
+sudo systemctl daemon-reload
+
 sudo systemctl restart mysql
 
 # Make sure mysql is enabled
 sudo systemctl enable mysql
+
+# Start mysql service
+sudo systemctl start mysql
 
 # We create a file to signal that the script has finished
 touch /tmp/finished-user-data

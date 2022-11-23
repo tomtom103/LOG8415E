@@ -1,18 +1,12 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 # Create a shared directory
 sudo mkdir -p /home/shared
 
 # Make shared directory available to all users
 sudo chmod -R 777 /home/shared/
-
-exec 3>&1 4>&2
-trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>/home/shared/output.log 2>&1
-
-# If you want to print to stdout: echo "$(date) : part 1 - start" >&3
-
-set -euxo pipefail
 
 # Install dependencies
 sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y libncurses5
@@ -37,14 +31,11 @@ ndb-connectstring=${master_ip}  # location of cluster manager
 # Create data node data directory
 sudo mkdir -p /usr/local/mysql/data
 
-# Start data node
-sudo ndbd >&3
-
 # Kill the manager before starting it as a service
-sudo pkill -f ndb_mgmd
+sudo pkill -f ndbd
 
 # Setup service config
-sudo touch /etc/systemd/system/ndb_mgmd.service
+sudo touch /etc/systemd/system/ndbd.service
 
 echo """[Unit]
 Description=MySQL NDB Data Node Daemon
@@ -69,9 +60,6 @@ sudo systemctl enable ndbd
 
 # Start the service
 sudo systemctl start ndbd
-
-# Get service status into console
-sudo systemctl status ndbd >&3
 
 # # We create a file to signal that the script has finished
 touch /tmp/finished-user-data

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -euxo pipefail
-
 # Create a shared directory
 sudo mkdir -p /home/shared
 
@@ -118,9 +116,7 @@ ndbcluster                      # run NDB storage engine
 ndb-connectstring=${master_ip}  # location of management server
 """ | sudo tee -a /etc/mysql/my.cnf
 
-# Reload system-ctl daemon
-sudo systemctl daemon-reload
-
+# Restart mysql service
 sudo systemctl restart mysql
 
 # Make sure mysql is enabled
@@ -129,5 +125,25 @@ sudo systemctl enable mysql
 # Start mysql service
 sudo systemctl start mysql
 
-# We create a file to signal that the script has finished
+# Install sysbench
+sudo apt-get install -y sysbench
+
+# Download the Sakila database example
+wget -O /home/shared/sakila-db.tar.gz https://downloads.mysql.com/docs/sakila-db.tar.gz
+
+# Extract the sakila database
+tar -xvzf /home/shared/sakila-db.tar.gz -C /home/shared/
+
+# Import the sakila database
+# Make sure that the data is present
+sudo mysql --user=root --password=root <<QUERY
+SOURCE /home/shared/sakila-db/sakila-schema.sql;
+SOURCE /home/shared/sakila-db/sakila-data.sql;
+USE sakila;
+SHOW FULL TABLES;
+SELECT COUNT(*) FROM film;
+SELECT COUNT(*) FROM film_text;
+QUERY
+
+# # We create a file to signal that the script has finished
 touch /tmp/finished-user-data

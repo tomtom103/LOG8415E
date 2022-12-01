@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -euxo pipefail
-
 sudo apt-get update -y && sudo apt-get upgrade -y
 
 # Install required dependencies

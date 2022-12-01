@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -euxo pipefail
-
 # Create a shared directory
 sudo mkdir -p /home/shared
 
@@ -51,9 +49,6 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 """ | sudo tee -a /etc/systemd/system/ndbd.service
-
-# Reload system-ctl daemon
-sudo systemctl daemon-reload
 
 # Enable the service
 sudo systemctl enable ndbd

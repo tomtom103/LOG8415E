@@ -1,5 +1,6 @@
 import uvicorn
 import logging
+import paramiko
 from fastapi import FastAPI
 
 from .api.api_router import api_router
@@ -13,7 +14,7 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def on_startup():
-    ...
+    CONFIG.RSA_PRIVATE_KEY = paramiko.RSAKey.from_private_key_file("labsuser.pem")
 
 @app.on_event("shutdown")
 async def on_shutdown():

@@ -4,6 +4,7 @@ import shlex
 from subprocess import Popen, PIPE, STDOUT
 
 from fastapi import Header, HTTPException
+from sshtunnel import SSHTunnelForwarder
 import pymysql
 from pymysql.connections import Connection
 from pymysql.cursors import DictCursor, Cursor
@@ -68,6 +69,22 @@ async def check_header(x_cluster_mode: str = Header(None)) -> None:
    
         
 def get_db() -> Iterator[Cursor]:
+    # with SSHTunnelForwarder(
+    #     CONFIG.MASTER_NODE_IP,
+    #     ssh_username=CONFIG.DB_USER,
+    #     ssh_pkey=CONFIG.RSA_PRIVATE_KEY,
+    #     remote_bind_address=(CONFIG.MASTER_NODE_IP, 3306),
+    # ) as tunnel:
+    #     connection = build_connection(tunnel.local_bind_host, CONFIG.BIND_ADDRESSES[0])
+    #     cursor = connection.cursor()
+    #     try:
+    #         yield cursor
+    #         connection.commit()
+    #     except Exception:
+    #         connection.rollback()
+    #     finally:
+    #         connection.close()
+
     connection = build_connection(CONFIG.PYMYSQL_HOST, CONFIG.PYMYSQL_BIND_ADDRESS)
     cursor = connection.cursor()
     try:

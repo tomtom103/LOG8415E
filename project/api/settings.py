@@ -1,4 +1,6 @@
-from typing import List
+import paramiko
+
+from typing import List, Optional
 
 from pydantic import BaseConfig
 
@@ -18,6 +20,7 @@ class Settings(BaseConfig):
     ]
     PYMYSQL_HOST: str = ""
     PYMYSQL_BIND_ADDRESS: str = ""
+    RSA_PRIVATE_KEY: Optional[paramiko.RSAKey] = None
 
     class Config:
         env_file = ".env"

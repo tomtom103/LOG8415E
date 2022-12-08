@@ -110,6 +110,8 @@ echo """
 [mysqld]
 # Options for mysqld process:
 ndbcluster                      # run NDB storage engine
+skip_ssl
+bind-address = 0.0.0.0
 
 [mysql_cluster]
 # Options for NDB Cluster processes:
@@ -124,6 +126,15 @@ sudo systemctl enable mysql
 
 # Start mysql service
 sudo systemctl start mysql
+
+# Create mysql user used by the API
+sudo mysql --user=root --password=root <<QUERY
+CREATE USER 'ubuntu'@'localhost' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'localhost' WITH GRANT OPTION;
+CREATE USER 'ubuntu'@'%' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON *.* TO 'ubuntu'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+QUERY
 
 # Install sysbench
 sudo apt-get install -y sysbench

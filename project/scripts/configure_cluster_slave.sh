@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euxo pipefail
 
 # Create a shared directory
 sudo mkdir -p /home/shared

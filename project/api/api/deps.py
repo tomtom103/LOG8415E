@@ -1,28 +1,29 @@
-import random
 import functools
 import logging
 import shlex
 from subprocess import Popen, PIPE, STDOUT
 
 from fastapi import Header, HTTPException
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+import pymysql
+from pymysql.connections import Connection
+from pymysql.cursors import DictCursor, Cursor
 from typing import Iterator
 
 from api.settings import CONFIG
 
 logger = logging.getLogger(__name__)
 
-
-def build_uri(host: str) -> str:
-    return f"mysql+mysqlconnector://ubuntu:root@{host}/sakila"
-
-
 @functools.lru_cache
-def get_sessionmaker(uri: str) -> sessionmaker:
-    engine = create_engine(uri, echo=True)
-    logger.info("CREATING ENGINE")
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def build_connection(host: str, bind_address: str)-> Connection:
+    return pymysql.connect(
+        host=host,
+        user=CONFIG.DB_USER,
+        password=CONFIG.DB_PASSWORD,
+        database=CONFIG.DB_NAME,
+        cursorclass=DictCursor,
+        bind_address=bind_address
+    )
+
 
 
 def get_cmd_output(cmd: str, stderr: int = STDOUT) -> str:
@@ -52,26 +53,27 @@ async def check_header(x_cluster_mode: str = Header(None)) -> None:
             detail="Invalid X-Cluster-Mode header"
         )
     if x_cluster_mode.lower() == 'direct-hit':
-        CONFIG.SQLALCHEMY_DATABASE_URI = build_uri(CONFIG.MASTER_NODE_IP)
+        CONFIG.PYMYSQL_HOST = CONFIG.MASTER_NODE_IP
+        CONFIG.PYMYSQL_BIND_ADDRESS = CONFIG.BIND_ADDRESSES[0]
         return
-    if x_cluster_mode.lower() == 'random':
-        random_ip = random.choice([CONFIG.MASTER_NODE_IP] + CONFIG.SLAVE_NODE_IPS)
-        CONFIG.SQLALCHEMY_DATABASE_URI = build_uri(random_ip)
-        return
-    if x_cluster_mode.lower() == 'ping':
-        all_instances = [CONFIG.MASTER_NODE_IP] + CONFIG.SLAVE_NODE_IPS
-        instance_pings = {name: get_ping_time(name) for name in all_instances}
-        CONFIG.SQLALCHEMY_DATABASE_URI = build_uri(max(instance_pings, key=instance_pings.get))
-        return
+    # if x_cluster_mode.lower() == 'random':
+    #     random_ip = random.choice([CONFIG.MASTER_NODE_IP] + CONFIG.SLAVE_NODE_IPS)
+    #     CONFIG.SQLALCHEMY_DATABASE_URI = build_uri(random_ip)
+    #     return
+    # if x_cluster_mode.lower() == 'ping':
+    #     all_instances = [CONFIG.MASTER_NODE_IP] + CONFIG.SLAVE_NODE_IPS
+    #     instance_pings = {name: get_ping_time(name) for name in all_instances}
+    #     CONFIG.SQLALCHEMY_DATABASE_URI = build_uri(max(instance_pings, key=instance_pings.get))
+    #     return
    
         
-def get_db() -> Iterator[Session]:
-    SessionLocal = get_sessionmaker(uri=CONFIG.SQLALCHEMY_DATABASE_URI)
-    session = SessionLocal()
+def get_db() -> Iterator[Cursor]:
+    connection = build_connection(CONFIG.PYMYSQL_HOST, CONFIG.PYMYSQL_BIND_ADDRESS)
+    cursor = connection.cursor()
     try:
-        yield session
-        session.commit()
+        yield cursor
+        connection.commit()
     except Exception:
-        session.rollback()
+        connection.rollback()
     finally:
-        session.close()
+        connection.close()

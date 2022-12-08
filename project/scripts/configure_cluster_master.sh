@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euxo pipefail
 
 # Create a shared directory
 sudo mkdir -p /home/shared
@@ -16,7 +17,7 @@ wget https://dev.mysql.com/get/Downloads/MySQL-Cluster-7.6/mysql-cluster-communi
 sudo dpkg -i mysql-cluster-community-management-server_7.6.6-1ubuntu18.04_amd64.deb
 
 # Create the mysql cluster file
-sudo mkdir /var/lib/mysql-cluster
+sudo mkdir -p /var/lib/mysql-cluster
 
 sudo touch /var/lib/mysql-cluster/config.ini
 

@@ -8,13 +8,16 @@ class Settings(BaseConfig):
     DB_USER: str = "ubuntu"
     DB_PASSWORD: str = "root"
     DB_NAME: str = "sakila"
-    MASTER_NODE_IP: str = "44.211.245.180"
-    SLAVE_NODE_IPS: List[str] = [
-        "44.199.204.247",
-        # "3.238.8.143",
-        # "3.235.43.112",
+    MASTER_NODE_IP: str = "35.175.123.158"
+    BIND_ADDRESSES: List[str] = [
+        # "slave1",
+        "0.0.0.0"
+        # "172.31.10.155"
+        # "127.0.0.1",
+        # "18.209.87.234",
     ]
-    SQLALCHEMY_DATABASE_URI: str = ""
+    PYMYSQL_HOST: str = ""
+    PYMYSQL_BIND_ADDRESS: str = ""
 
     class Config:
         env_file = ".env"

@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from api.api.deps import get_db
+from pymysql.cursors import Cursor
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +13,10 @@ base_route = ""
 
 @router.get(base_route)
 def get_films(
-    session: Session = Depends(get_db)
+    cursor: Cursor = Depends(get_db)
 ):
-    films = session.execute(
+    modified_rows = cursor.execute(
         "SELECT * FROM film"
-    ).all()
-
-    logger.info(f"Films: {films}")
-    
-    return films
+    )
+    logger.info(f"Modified rows: {modified_rows}")
+    return cursor.fetchall()

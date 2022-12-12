@@ -132,23 +132,23 @@ resource "aws_security_group" "everywhere" {
 }
 
 # Instance hosting the proxy pattern
-# resource "aws_instance" "proxy" {
-#     # We want to make sure the master and slave instances are created before the proxy instance
-#     depends_on = [
-#         aws_instance.master,
-#         aws_instance.slave,
-#     ]
-#     instance_type = "t2.micro"
-#     key_name = "vockey"
+resource "aws_instance" "proxy" {
+    # We want to make sure the master and slave instances are created before the proxy instance
+    depends_on = [
+        aws_instance.master,
+        aws_instance.slave,
+    ]
+    instance_type = "t2.micro"
+    key_name = "vockey"
 
-#     vpc_security_group_ids = [
-#         aws_security_group.everywhere.id,
-#     ]
-#     subnet_id = element(tolist(data.aws_subnets.all.ids), 0)
+    vpc_security_group_ids = [
+        aws_security_group.everywhere.id,
+    ]
+    subnet_id = element(tolist(data.aws_subnets.all.ids), 0)
 
-#     ami = "ami-0ee23bfc74a881de5"
+    ami = "ami-0ee23bfc74a881de5"
 
-#     tags = {
-#         "Name": "Proxy"
-#     }
-# }
+    tags = {
+        "Name": "Proxy"
+    }
+}

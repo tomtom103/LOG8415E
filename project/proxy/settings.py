@@ -23,11 +23,6 @@ class Settings(BaseConfig):
 
     RSA_PRIVATE_KEY: Optional[paramiko.RSAKey] = None
 
-    class Config:
-        env_file = ".env"
-        env_prefix = ''
-        env_file_encoding = "utf-8"
-
 CONFIG = Settings()
 
 class LogConfig(BaseModel):

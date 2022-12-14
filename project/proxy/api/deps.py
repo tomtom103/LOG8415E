@@ -45,13 +45,12 @@ async def check_header(x_cluster_mode: str = Header(None)):
             status_code=400,
             detail="Invalid X-Cluster-Mode header"
         )
-    all_instances = [CONFIG.MASTER_NODE_IP] + CONFIG.SLAVE_NODE_IPS
     if x_cluster_mode.lower() == 'direct-hit':
         CONFIG.CHOSEN_HOST = CONFIG.MASTER_NODE_IP
     if x_cluster_mode.lower() == 'random':
-        CONFIG.CHOSEN_HOST = random.choice(all_instances)
+        CONFIG.CHOSEN_HOST = random.choice(CONFIG.ALL_NODE_IPS)
     if x_cluster_mode.lower() == 'ping':
-        instance_pings = { name: get_ping_time(name) for name in all_instances }
+        instance_pings = { name: get_ping_time(name) for name in CONFIG.ALL_NODE_IPS }
         # Get the instance with the lowest ping time
         lowest_ping = min(instance_pings, key=instance_pings.get)
         logger.info(f"Chosen host: {lowest_ping}")

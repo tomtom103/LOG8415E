@@ -14,9 +14,12 @@ app = FastAPI(debug=True)
 
 app.include_router(api_router)
 
+app.get("/")(lambda: "Hello, world!")
+
 @app.on_event("startup")
 async def on_startup():
     logger.info("Starting up")
+    # Load the private key from the .pem file into memory
     CONFIG.RSA_PRIVATE_KEY = paramiko.RSAKey.from_private_key_file("labsuser.pem")
 
 @app.on_event("shutdown")

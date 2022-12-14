@@ -15,3 +15,11 @@ standalone:
 		terraform init && \
 		terraform plan && \
 		terraform apply -auto-approve
+
+.PHONY: proxy
+proxy:
+	@echo "Creating proxy..."
+	@cd ./proxy && \
+		terraform init && \
+		terraform plan && \
+		terraform apply -auto-approve

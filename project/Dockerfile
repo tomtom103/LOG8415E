@@ -8,8 +8,9 @@ RUN pip3 install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copy the code:
 COPY ./proxy /code/proxy
+COPY .env /code/.env
 
-# Install dependencies:
+# Install fping
 RUN apt-get update && apt-get install -y fping
 
 COPY ./labsuser.pem /code/labsuser.pem

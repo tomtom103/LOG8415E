@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from proxy.api.deps import get_db
 from pymysql.cursors import Cursor
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("api")
 
 router = APIRouter()
 

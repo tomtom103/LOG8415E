@@ -1,29 +1,50 @@
 import paramiko
-import dotenv
+import functools
 
 from typing import List, Optional
-from pydantic import BaseConfig, BaseModel
+from pydantic import BaseSettings, BaseModel, validator
 
-class Settings(BaseConfig):
+@functools.lru_cache
+def get_settings():
+    return Settings()
+
+class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     DB_USER: str = "ubuntu"
     DB_PASSWORD: str = "root"
     DB_NAME: str = "sakila"
-    MASTER_NODE_IP = "44.213.89.51"
-    SLAVE_NODE_IPS = [
-        "75.101.226.3",
-        "18.207.182.189",
-        "44.193.83.58"
-    ]
+
+    # Master and Slave ips
+    # These are set via environment variables
+    MASTER_NODE_IP: str = ""
+    SLAVE_NODE_0_IP: str = ""
+    SLAVE_NODE_1_IP: str = ""
+    SLAVE_NODE_2_IP: str = ""
+
+    ALL_NODE_IPS: List[str] = []
+    @validator("ALL_NODE_IPS", pre=True)
+    def set_all_node_ips(cls, v, values) -> List[str]:
+        return [
+            values["MASTER_NODE_IP"],
+            values["SLAVE_NODE_0_IP"],
+            values["SLAVE_NODE_1_IP"],
+            values["SLAVE_NODE_2_IP"],
+        ]
 
     # Host used by SSHTunnelForwarder
     # Value is set by the check_header dependency
     CHOSEN_HOST: Optional[str] = None
 
+    # File is read from labsuser.pem file
+    # This is required by SSHTunnelForwarder
     RSA_PRIVATE_KEY: Optional[paramiko.RSAKey] = None
 
-CONFIG = Settings()
+    class Config:
+        env_file = '.env'
+        env_file_encoding = "utf-8"
+
+CONFIG = get_settings()
 
 class LogConfig(BaseModel):
     """Logging configuration to be set for the server"""

@@ -1,9 +1,11 @@
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel
 from proxy.api.deps import get_db
 from pymysql.cursors import Cursor
+
+from proxy.settings import CONFIG
 
 logger = logging.getLogger("api")
 
@@ -17,10 +19,12 @@ class SQLQuery(BaseModel):
 @router.post(base_route)
 async def post_raw_sql(
     sql: SQLQuery,
+    response: Response,
     cursor: Cursor = Depends(get_db)
 ):
     modified_rows = cursor.execute(
         sql.sql
     )
-    logger.info(f"Modified rows: {modified_rows}")
+    response.headers["X-Total-Row-Count"] = str(modified_rows)
+    response.headers["X-Instance-IP"] = CONFIG.CHOSEN_HOST
     return cursor.fetchall()
